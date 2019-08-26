@@ -1,0 +1,398 @@
+---
+title: 'MSA 8150: Machine Learning - Homework 2'
+author: "Nykosi Hollingsworth (Panther ID: 002389535)"
+date: "February 27, 2019"
+output: pdf_document
+header-includes:
+   - \usepackage{mathtools}
+   - \usepackage{amsmath}
+   - \usepackage{siunitx}
+   - \usepackage{array}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# List of Student Discussions
+
+* Brett Evans
+* Faraz Mirza
+* Vamsi Chinta
+* Syed Kamil
+* Peter McCort
+
+## Question 1
+
+### Part (a)
+
+$$
+f(x) = \frac{\theta^4x^3_ie^{-\theta x_i}}{6} \\[30pt]
+$$
+\[
+\begin{aligned}
+L(\theta) &= \prod^n_{i=1}f(x_i|\theta)\\[10pt]
+&=\frac{\theta^4x^3_1e^{-\theta x_1}}{6} \cdot\frac{\theta^4x^3_2e^{-\theta x_2}}{6} \cdot \dots \cdot \frac{\theta^4x^3_ne^{-\theta x_n}}{6}\\[10pt]
+& = \frac{\theta^{4n}e^{-\theta \sum^n_{i=1}x_i}\prod^n_{i=1}x^3_i}{6^n}\\
+\end{aligned}
+\\[20pt]
+\]
+
+\[
+\begin{aligned}
+logL(\theta) &= log\left( \frac{\theta^{4n}e^{-\theta \sum^n_{i=1}x_i}\prod^n_{i=1}x^3_i}{6^n} \right) \\[10pt]
+            &= log(\theta^{4n}) + log(e^{-\theta \sum^n_{i=1}x_i}) + log(\prod^n_{i=1}x^3_i) - log(6^n) \\
+            &= 4n \cdot log(\theta) + \theta\sum^n_{i=1}x_i + 3\sum^n_{i=1}log(x_i) + n\cdot log(6) \\
+\end{aligned}
+\]
+
+\[
+\begin{aligned}
+\frac{\partial}{\partial\theta} logL(\theta) &= \frac{4n}{\theta} - \sum^n_{i=1}x_i = 0\\[10pt]
+&\Rightarrow \frac{4n}{\theta} = \sum^n_{i=1}x_i\\
+&\Rightarrow \theta = \frac{4n}{\sum^n_{i=1}x_i}
+\end{aligned}
+\]
+
+### Part (b)
+
+```{r message=FALSE, warning=FALSE}
+#install.packages('Metrics')
+#install.packages('caret')
+library(Metrics)
+library(ISLR)
+library(boot)
+library(MASS)
+library(class)
+library(caret)
+```
+
+```{r}
+values <- c(0.3057, 0.7227, 1.1566, 2.8622, 1.3588, 
+            0.5377, 0.4336, 0.3426, 3.5784, 2.7694)
+
+keys <- 1:10
+data <- data.frame(keys,values)
+theta.ml <- (4*length(values))/sum(values)
+length(data[,1])
+
+# Boot Function
+boot.fn = function(df, index){
+  return(4*length(df[,1])/sum(df[index,2]))
+}
+
+set.seed(1)
+boot.stats <- boot(data, boot.fn, 50000)
+print(boot.stats)
+```
+
+### Part (c)
+
+```{r}
+set.seed(1)
+boot.stats2 <- boot(data, boot.fn, 1000)
+print(boot.stats2)
+```
+
+Though the standard error of $B = 50,000$ is lower, there isn't much difference between them. This is mainly due to there being, at max, $2^{10} = 1024$ unique combinations to bootstrap. Thus, the lower error comes from the a mixture of the 24 combinations not included in $B = 1000$ as well as repeated samples. 
+
+## Question 2
+
+$$
+\delta = x^{\intercal}\Sigma^{-1}\mu - \frac{1}{2}\mu^\intercal\Sigma^{-1}\mu + log(\pi)
+$$
+
+\[
+\begin{aligned}
+\delta_1 &= (x_1 \space x_2)
+\begin{pmatrix}
+    5       & -2\\
+    -2       & 2\\
+\end{pmatrix}
+\begin{pmatrix}
+    -3\\
+    2\\
+\end{pmatrix} - \frac{1}{2} 
+\begin{pmatrix}
+  -3 & 2\\
+\end{pmatrix}
+\begin{pmatrix}
+    5       & -2\\
+    -2       & 2\\
+\end{pmatrix}
+\begin{pmatrix}
+    -3\\
+    2\\
+\end{pmatrix}\\[10pt]
+&= -19x_1 + 10x_2 - \frac{77}{2} + \log(\frac{1}{3})
+\end{aligned}
+\]
+
+\[
+\begin{aligned}
+\delta_2 &= (x_1 \space x_2)
+\begin{pmatrix}
+    5       & -2\\
+    -2       & 2\\
+\end{pmatrix}
+\begin{pmatrix}
+    2\\
+    1\\
+\end{pmatrix} - \frac{1}{2} 
+\begin{pmatrix}
+  2 & 1\\
+\end{pmatrix}
+\begin{pmatrix}
+    5       & -2\\
+    -2       & 2\\
+\end{pmatrix}
+\begin{pmatrix}
+    2\\
+    1\\
+\end{pmatrix}\\[10pt]
+&= 8x_1 - 2x_2 - \frac{14}{2} + \log(\frac{2}{3})
+\end{aligned}
+\\[20pt]
+\]
+
+$$
+\delta_1 = \delta_2
+$$
+
+\[
+\begin{aligned}
+-19x_1 + 10x_2 - \frac{77}{2} + \log(\frac{1}{3}) &= 8x_1 - 2x_2 - \frac{14}{2} + \log(\frac{2}{3}) \\
+-19x_1 + 10x_2 - \frac{77}{2} + \log(1) - \log(3) &= 8x_1 - 2x_2 - \frac{14}{2} + \log(2) - \log(3) \\
+-19x_1 + 10x_2 -8x_1 + 2x_2 &= \frac{77}{2} - \frac{14}{2} - \log(1) + \log(3) + \log(2) - \log(3) \\[6pt]
+12x_2 - 27x_1 &= \frac{63}{2} + \log(2)  - \log(1)\\
+12x_2 - 27x_1 &= 31.5 + \log(2)\\
+\end{aligned}
+\]
+
+## Question 3
+
+### Part (a)
+```{r}
+data_heart <- read.csv("HeartData.csv")
+#head(data_heart)
+#str(data_heart)
+
+train <- data_heart[1:200,]
+test <- data_heart[201:297,]
+```
+
+```{r}
+#---- Logistic Regression
+features <- colnames(train)
+features <- features[features!='num']
+
+glm.fit <- glm(reformulate(features, response = 'num'), data = train, family = 'binomial')
+#summary(glm.fit)
+
+glm.coef <- summary(glm.fit)$coef
+glm.coef[order(glm.coef[,4], decreasing = TRUE),]
+```
+
+From the reported p-values, it shows that "$age, oldpeak, excang, slope, chol,$ and $fbs$" are the features with the highest p-values and, thus, the least significance. All of these variables fail conventional $\alpha$ levels for Type-I errors (0.01, 0.05, 0.1).
+
+```{r}
+#Accuracy
+
+glm.prob <- predict(glm.fit, newdata = test, type = 'response')
+glm.pred <- rep('0', 97)
+glm.pred[glm.prob > 0.5] <- '1'
+accuracy(test$num, glm.pred)
+```
+
+```{r}
+#---- LDA
+lda.fit <- lda(num ~ ., data = train)
+lda.fit
+
+  #Accuracy
+lda.pred <- predict(lda.fit, newdata = test)
+lda.class <- lda.pred$class
+
+print(accuracy(test$num, lda.class))
+```
+
+```{r}
+#---- QDA
+qda.fit <- qda(num~.,data = train)
+qda.fit
+
+  #Accuracy
+qda.class <- predict(qda.fit, newdata = test)$class
+
+accuracy(test$num, qda.class)
+```
+
+```{r}
+#---- KNN 
+n <- c(1,5,10)
+knn_optimum <- function (train, test, n) {
+ 
+  models <- data.frame(matrix(ncol = 2, nrow = length(n)))
+  names(models) <- c('K-NN', 'Accuracy')  
+  row <- 1
+  
+  for (i in n){
+    knn.fit <- knn(train,test,train[,'num'] ,k=i)
+    
+    models[row,1] <- i
+    models[row,2] <- accuracy(test$num, knn.fit)
+    
+    row <- row + 1
+  }
+  
+  print(models)
+}
+
+set.seed(1)
+plot(knn_optimum(train, test, n))
+abline(v = 5, lty=2)
+```
+
+In this part, the most accurate model stands to be the LDA model at $81.4433$% accuracy.
+
+### Part (b)
+
+```{r echo=TRUE, results='hide'}
+f <- c("sex", "cp", "fbs", "slope", "exang", "ca", "thal")
+
+to_factor <- function(df, features){
+  for (i in features){
+   df[,i] <- factor(df[,i])
+  }
+  
+  print(df)
+}
+
+train.cat <- to_factor(train, f)
+#str(train.cat)
+
+test.cat <- to_factor(test, f)
+#str(test.cat)
+```
+
+```{r}
+#---- Logistic Regression
+glm.fit <- glm(reformulate(features, response = 'num'), data = train.cat, family = 'binomial')
+#summary(glm.fit)
+
+glm.coef <- summary(glm.fit)$coef
+glm.coef[order(glm.coef[,4], decreasing = TRUE),]
+
+#Accuracy
+
+glm.prob <- predict(glm.fit, newdata = test.cat, type = 'response')
+glm.pred <- rep('0', 97)
+glm.pred[glm.prob > 0.5] <- '1'
+accuracy(test.cat$num, glm.pred)
+```
+
+```{r}
+#---- LDA
+lda.fit <- lda(num ~ ., data = train.cat)
+lda.fit
+
+#Accuracy
+lda.pred <- predict(lda.fit, newdata = test.cat)
+lda.class <- lda.pred$class
+
+accuracy(test$num, lda.class)
+```
+
+```{r}
+#---- QDA
+qda.fit <- qda(num~.,data = train.cat)
+qda.fit
+
+#Accuracy
+qda.class <- predict(qda.fit, newdata = test.cat)$class
+
+accuracy(test.cat$num, qda.class)
+```
+
+```{r}
+#---- KNN
+n <- c(1,5,10)
+set.seed(1)
+
+plot(knn_optimum(train.cat, test.cat, n))
+abline(v = 5, lty=2)
+```
+
+After converting categorical features into factors, the model that stands out for accuract is the QDA model at $83.505$% accuracy.
+
+### Part (c)
+
+```{r echo = TRUE, results='hide'}
+data.cat <- to_factor(data_heart, f)
+```
+
+```{r}
+#----Logistic Regression
+
+#- LOOCV
+trControl <- trainControl(method = "LOOCV", savePredictions = 'all')
+glm.fit.loocv <- train(factor(num)~., data = data.cat, family = 'binomial', method = 'glm', trControl = trControl)
+
+  #Accuracy
+glm.fit.loocv$results[2]
+
+#- 10-Fold CV
+set.seed(1)
+trControl <- trainControl(method = "cv", number = 10, savePredictions = 'all')
+glm.fit.10 <- train(factor(num)~., data = data.cat, family = 'binomial', method = 'glm', trControl = trControl)
+
+  #Accuracy
+glm.fit.10$results[2]
+```
+
+```{r}
+#---- LDA
+
+#- LOOCV
+set.seed(1)
+trControl <- trainControl(method = "LOOCV", savePredictions = 'all')
+lda.fit.loocv <- train(factor(num)~., data = data.cat, method = 'lda', trControl = trControl)
+
+  #Accuracy
+lda.fit.loocv$results[2]
+
+
+#- 10-Fold CV
+set.seed(1)
+trControl <- trainControl(method = "cv", number = 10, savePredictions = 'all')
+lda.fit.10 <- train(factor(num)~., data = data.cat, method = 'lda', trControl = trControl)
+
+  #Accuracy
+lda.fit.10$results[2]
+```
+
+```{r}
+#---- QDA 
+
+#- LOOCV
+set.seed(1)
+trControl <- trainControl(method = "LOOCV", savePredictions = 'all')
+qda.fit.loocv <- train(factor(num)~., data = data.cat, method = 'qda', trControl = trControl)
+
+  #Accuracy
+qda.fit.loocv$results[2]
+
+
+#- 10-Fold CV
+set.seed(1)
+trControl <- trainControl(method = "cv", number = 10, savePredictions = 'all')
+qda.fit.10 <- train(factor(num)~., data = data.cat, method = 'qda', trControl = trControl)
+
+  #Accuracy
+qda.fit.10$results[2]
+```
+
+There is not much difference between LOOCV and K-Fold methods (generally $<0.1$). However, because LOOCV is a more extreme version of K-Fold, we see a trend of being more accurate at the cost of being more computationally heavy.
+
+In practice, especially with large data sets, K-Fold's accuracy is sufficient. This is supported by the most accurate model overall being an LDA model using 10-Fold CV at $85.18$% accuracy.
+

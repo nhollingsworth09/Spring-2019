@@ -1,0 +1,391 @@
+---
+title: 'MSA 8150: Machine Learning - Homework 1'
+author: "Nykosi Hollingsworth (Panther ID: 002389535)"
+date: "February 12, 2019"
+output: pdf_document
+header-includes:
+   - \usepackage{mathtools}
+   - \usepackage{amsmath}
+   - \usepackage{siunitx}
+   - \usepackage{array}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+
+### Part (a)
+$$
+y = \frac{\beta}{x} \Longrightarrow y_i = \frac{\hat{\beta}}{x_i}
+$$
+
+
+$$
+\begin{aligned}
+SSR &= \sum_{i=1}^{n} (y_i - \hat{y_i})^2 \\
+&= \sum_{i=1}^{n} \left(y_i - \frac{\hat{\beta}}{x_i}\right)^2 \\
+\qquad \\
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+\frac{\partial SSR}{\partial \hat{\beta}} &= 2 \sum_{i=1}^{n}\left(y_i - \frac{\hat{\beta}}{x_i}\right)(-x_i^{-1}) \\
+&= 2 \sum_{i=1}^{n} \left(\hat{\beta}{x_i}^{-2}  - y_i{x_i}^{-1}\right) \\
+&= 2 \left[ \hat{\beta}\sum_{i=1}^{n}{x_i}^{-2} - \sum_{i=1}^{n}y_i{x_i}^{-1} \right] = 0 \\
+\end{aligned}
+$$
+$$
+\begin{aligned}
+\therefore \space &\hat{\beta}\sum_{i=1}^{n}{x_i}^{-2} - \sum_{i=1}^{n}y_i{x_i}^{-1} = 0 \\
+&\hat{\beta} = \frac{\sum_{i=1}^{n}y_i{x_i}^{-1}}{\sum_{i=1}^{n}{x_i}^{-2}}
+\end{aligned}
+$$
+
+
+### Part (b)
+
+$$
+\qquad \\
+\begin{aligned}
+Var(\hat{\beta}) &= Var \left[ \frac{\sum_{i=1}^{n}y_i{x_i}^{-1}}{\sum_{i=1}^{n}{x_i}^{-2}} \right] \\
+&=  \frac{1}{\left( \sum_{i=1}^{n}{x_i}^{-2}\right)^2} \space Var\left[ \sum_{i=1}^{n}y_i{x_i}^{-1}\right] \\ \\
+&= \frac{1}{\left( \sum_{i=1}^{n}{x_i}^{-2}\right)^2} \space \left[{x_1}^{-2}\hat{\sigma} + {x_2}^{-2}\hat{\sigma} + \dots + {x_n}^{-2}\hat{\sigma}\right] \\ \\
+&= \frac{\hat{\sigma} \sum_{i=1}^{n}{x_i}^{-2}}{\left( \sum_{i=1}^{n}{x_i}^{-2}\right)^2} = \frac{\hat{\sigma}}{\sum_{i=1}^{n}{x_i}^{-2}}
+\end{aligned}
+$$
+  
+### Part (c)
+
+$$
+y = \frac{\beta}{g(x)} \Longrightarrow y_i = \frac{\hat{\beta}}{g(x_i)}
+$$
+
+
+$$
+\begin{aligned}
+SSR &= \sum_{i=1}^{n} (y_i - \hat{y_i})^2 \\
+&= \sum_{i=1}^{n} \left(y_i - \frac{\hat{\beta}}{g(x_i)}\right)^2 \\
+\qquad \\
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+\frac{\partial SSR}{\partial \hat{\beta}} &= 2 \sum_{i=1}^{n}\left(y_i - \frac{\hat{\beta}}{g(x_i)}\right)(-{g(x_i)}^{-1}) \\
+&= 2 \sum_{i=1}^{n} \left(\hat{\beta}{g^2(x_i)}^{-1}  - y_i{g(x_i)}^{-1}\right) \\
+&= 2 \left[ \hat{\beta}\sum_{i=1}^{n}{g^2(x_i)}^{-1} - \sum_{i=1}^{n}y_i{g(x_i)^{-1}} \right] = 0 \\
+\end{aligned}
+$$
+$$
+\begin{aligned}
+\therefore \space &\hat{\beta}\sum_{i=1}^{n}{g^2(x_i)}^{-1} - \sum_{i=1}^{n}y_i{g(x_i)}^{-1} = 0 \\
+&\hat{\beta} = \frac{\sum_{i=1}^{n}y_i{g(x_1)}^{-1}}{\sum_{i=1}^{n}{g^2(x_2)}}
+\end{aligned}
+$$
+
+### Part (d)
+
+$$
+\qquad \\
+\begin{aligned}
+Var(\hat{\beta}) &= Var \left[ \frac{\sum_{i=1}^{n}y_i{g(x_i)}^{-1}}{\sum_{i=1}^{n}g^2(x_i)} \right] \\
+&=  \frac{1}{\left( \sum_{i=1}^{n}{g^2(x_i)}\right)^2} \space Var\left[ \sum_{i=1}^{n}y_i{g(x_i)}^{-1}\right] \\ \\
+&= \frac{1}{\left( \sum_{i=1}^{n}{g^2(x_i)}\right)^2} \space \left[{x_1}^{-2}\hat{\sigma} + {x_2}^{-2}\hat{\sigma} + \dots + {x_n}^{-2}\hat{\sigma}\right] \\ \\
+&= \frac{\hat{\sigma} \sum_{i=1}^{n}{g^2(x_i)}}{\left( \sum_{i=1}^{n}{g^2(x_i)}\right)^2} = \frac{\hat{\sigma}}{\sum_{i=1}^{n}{g^2(x_i)}}
+\end{aligned}
+$$
+
+### Part (e)
+
+Based on the equation, $Var(\hat{\beta}) = \frac{\hat{\sigma}}{\sum_{i=1}^{n}{g^2(x_i)}}$, it is better to have large values of $g^2(x_i)$ so that $Var(\hat{\beta})$ approaches the ideal situation where it is zero. 
+
+## Question 2
+
+```{r}
+#-- Importing and Editing Data
+
+#Original Data
+grav <- read.csv('GravityForce.csv')
+#head(grav, 3)
+
+#Data with Log Values
+grav2 <- cbind(grav, log(grav$MASS1), log(grav$MASS2), log(grav$DISTANCE), log(grav$FORCE))
+
+names <- append(colnames(grav), c('LOG_MASS1','LOG_MASS2','LOG_DISTANCE','LOG_FORCE'))
+colnames(grav2) <- names
+
+head(grav2, 1)
+
+#Splitting Test and Train
+train <- grav2[1:200,]
+#nrow(train)
+test <- grav2[201:240,]
+#nrow(test)
+test.y <- grav2[201:240, 4]
+```
+
+### Part (a)
+
+```{r}
+M1 <- lm(FORCE ~ MASS1 + MASS2 + DISTANCE, data = train)
+```
+
+$$
+\begin{tabular}{ l l l l }
+  $\beta_0 \approx10.17$ & $se(\beta_0) \approx 10.82$ & Conf. Int $\approx$ $(-11.16, 31.51)$ & P-values $\approx$ 0.348\\ 
+  $\beta_1 \approx 1.85 \times 10^{-5}$ & $se(\beta_1) \approx 7.40 \times 10^{-6}$ & Conf. Int $\approx$ $(3.99 \times 10^{-6}, 3.32 \times 10^{-5})$ & P-values $\approx$ 0.013\\   
+  $\beta_2 \approx 1.49 \times 10^{-5}$ & $se(\beta_2) \approx 7.31 \times 10^{-6}$ & Conf. Int $\approx$ $(5.19 \times 10^{-7}, 2.94 \times 10^{-5})$ & P-values $\approx$ 0.042\\ 
+  $\beta_3 \approx -2.74$ & $se(\beta_3) \approx 0.7$ & Conf. Int $\approx$ $(-4.12, -1.36 )$ & P-values $\approx$ 0.0001\\ 
+\end{tabular}
+$$
+
+$$
+R^2 = 0.1166
+$$
+
+The $R^2$ statistic tells us the portion of the explained error within the model; in other words, it quantifies how closely our model fits the data. Since we have an $R^2$ of 11.66%, it tells us that this model is not able to accurately capture the relationship defined for $M_1$
+
+### Part (b)
+
+For a $\alpha = 0.05$, the only estimator that is insignificant (or not signifiantly different from 0) is the intercept, $\beta_0$. This, however, is logical since the force is expected to be zero (or very close to it) given all other values being zero. 
+
+### Part (c)
+
+```{r}
+M1_pred <- predict(M1, test)
+
+E1 <- dist(rbind(M1_pred, test.y), method='euclidean')
+E1
+```
+### Part (d)
+
+```{r}
+M2 <- lm(LOG_FORCE ~ LOG_MASS1 + LOG_MASS2 + LOG_DISTANCE, data = train)
+```
+
+$$
+\begin{tabular}{ l l l l }
+  $\gamma_0 \approx -22.22$ & $se(\gamma_0) \approx 0.71$ & Conf. Int $\approx$ $(-23.62, -20.81)$ & P-values $\approx$ $4.89\times10^{-78}$\\ 
+  $\alpha_1 \approx 0.96$ & $se(\alpha_1) \approx 0.037$ & Conf. Int $\approx$ $(0.89, 1.04)$ & P-values $\approx$ $2.21\times10^{-66}$\\
+  $\alpha_2 \approx 0.97$ & $se(\alpha_2) \approx 0.039$ & Conf. Int $\approx$ $(0.90, 1.05)$ & P-values $\approx$ $1.93\times10^{-62}$\\ 
+  $\alpha_3 \approx -3.14$ & $se(\alpha_3) \approx 0.043$ & Conf. Int $\approx$ $(-3.23, -3.06)$ & P-values $\approx$ $2.57times10^{-143}$\\ 
+\end{tabular}
+$$
+
+$$
+R^2 = 0.9715
+$$
+
+### Part (e)
+
+```{r}
+M2_pred <- predict(M2, test)
+
+E2 <- dist(rbind(exp(M2_pred), test.y), method='euclidean')
+E2
+```
+
+### Part (f)
+
+```{r}
+M3 <- lm(LOG_FORCE ~ LOG_MASS1 + LOG_MASS2 + LOG_DISTANCE + DISTANCE, data = train)
+```
+
+$$
+\begin{tabular}{ l l l l }
+  $\gamma_0 \approx -23.37$ & $se(\gamma_0) \approx 0.012$ & Conf. Int $\approx$ $(-23.39, -23.34)$ & P-values $\approx$ 0\\ 
+  $\alpha_1 \approx 1$ & $se(\alpha_1) \approx 0.0006$ & Conf. Int $\approx$ $(0.9972, 0.9997)$ & P-values $\approx$ 0\\
+  $\alpha_2 \approx 1$ & $se(\alpha_2) \approx 0.0007$ & Conf. Int $\approx$ $(0.9988, 1.0014)$ & P-values $\approx$ 0\\ 
+  $\alpha_3 \approx -2$ & $se(\alpha_3) \approx 0.0016$ & Conf. Int $\approx$ $(-2.0024, -1.9961)$ & P-values $\approx$ 0\\ 
+  $\alpha_4 \approx -0.2$ & $se(\alpha_4) \approx 0.0002$ & Conf. Int $\approx$ $(-0.2003, -0.1994)$ & P-values $\approx$ 0\\ 
+\end{tabular}
+$$
+
+$$
+R^2 = 1
+$$
+
+### Part (g)
+
+```{r}
+M3_pred <- predict(M3, test)
+
+E3 <- dist(rbind(exp(M3_pred), test.y), method = 'euclidean')
+E3
+```
+### Part (h)
+
+```{r}
+rbind(c("E1",E1[1]),c("E2", E2[1]),c("E3", E3[1]))
+```
+As expected, $M_1$ has a high $SSR$ due to it's considerably low $R^2$, showing the model is inadequate. However, despite $M_2$'s high $R^2$, it has the largest $SSR$. This can be explained due to the model's inability to accurately predict force when the distance is below 1 (but greater than 0).
+
+$M_3$ shows the most promise due to being an improved verion of $M_3$ that accounts for the expnential growth of force if the radius is fractional.
+
+### Part (i)
+
+Our model, $M_3$ followed can be related to the original Newtonian equation with the following mathematical steps. Note that we must assume $\alpha_3$ to be negative (the greater the radius, the lower the force) to perfectly recreate the equation:
+
+$$
+\begin{aligned}
+log(F) &= \gamma_0 + \alpha_1log(m_1) +  \alpha_2log(m_2) - \alpha_3log(r) \\ \\
+log(F) &= \gamma_0 + log\left(\frac{m_2^{\alpha_1}m_3^{\alpha_2}}{r^{\alpha_3}}\right) \\ \\
+e^{log(F)} &= e^{\gamma_0 + log\left(\frac{m_2^{\alpha_1}m_3^{\alpha_2}}{r^{\alpha_3}}\right)} \\ \\
+F &= e^{\gamma_0}\left(\frac{m_2^{\alpha_1}m_3^{\alpha_2}}{r^{\alpha_3}}\right)
+\end{aligned}
+$$
+
+Where we hope to model $e^{\gamma_0} \approx G \approx 6.67\times10^{-11}$ (universal gravitational constant), and $\alpha_1, \alpha_2, \alpha_3 \approx 1, 1, 2$, respectively.  
+
+### Part (j)
+
+Similar to Part (i), we use the assumption that $\alpha_3$ and $\alpha_4$ to be negative (the greater the radius, the lower the force) to perfectly recreate the Newton-Laplace equation:
+
+$$
+\begin{aligned}
+log(F) &= \gamma_0 + \alpha_1log(q_1) +  \alpha_2log(q_2) - \alpha_3log(r) - \alpha_4 r \\ \\
+log(F) &= \gamma_0 + log\left(\frac{q_2^{\alpha_1}q_3^{\alpha_2}}{r^{\alpha_3}}\right) - \alpha_4 r\\ \\
+e^{log(F)} &= e^{\gamma_0 + log\left(\frac{m_2^{\alpha_1}m_3^{\alpha_2}}{r^{\alpha_3}}\right) - \alpha_4 r} \\ \\
+F &= e^{\gamma_0}\left(\frac{m_2^{\alpha_1}m_3^{\alpha_2}}{r^{\alpha_3}}\right)e^{-\alpha_4 r}
+\end{aligned}
+$$
+
+Where we hope to model $e^{\gamma_0} \approx G \approx 6.67\times10^{-11}$ (universal gravitational constant), and $\alpha_1, \alpha_2, \alpha_3 \approx 1, 1, 2$, respectively.
+
+## Question 3
+
+```{r}
+rm(list=ls())
+
+#-- Importing and Editing Data
+p <- read.csv('Polarization.csv')
+
+#-- Adding exponential variants
+p2 <- cbind(p,(p$TEMP)^2,(p$TEMP)^3,(p$TEMP)^4,(p$TEMP)^5,(p$TEMP)^6,(p$TEMP)^7,
+            (p$TEMP)^8,(p$TEMP)^9,(p$TEMP)^10)
+colnames(p2) <- append(colnames(p), c("TEMP.2", "TEMP.3","TEMP.4","TEMP.5","TEMP.6",
+                                      "TEMP.7","TEMP.8","TEMP.9","TEMP.10"))
+head(p2,1)
+
+#-- Splitting Test and Train
+train <- p2[1:500,]
+test <- p2[501:1100,]
+test.y <- p2[501:1100,2]
+```
+### Part (a)
+
+```{r}
+f1 <- lm(FIELD ~ TEMP + TEMP.2 + TEMP.3 + TEMP.4 + TEMP.5 + TEMP.6 + TEMP.7 + TEMP.8 + 
+           TEMP.9 + TEMP.10,data = train)
+```
+$$
+\begin{tabular}{ l l l l }
+  $\beta_0 \approx 2.30$ & $se(\beta_0) \approx 0.214$  & Conf. Int $\approx$ $(1.88, 2.72)$ & P-values $\approx$ $2.21\times10^{-24}$\\ 
+  $\beta_1 \approx 0.0259$ & $se(\beta_1) \approx 0.0478$ & Conf. Int $\approx$ $(-.0683, 0.120)$ & P-values $\approx$ 0.590\\ 
+  $\beta_2 \approx -0.0114$ & $se(\beta_2) \approx 0.0057$ & Conf. Int $\approx$ $(-.0227, -2.29\times10^{-4})$ & P-values $\approx$ 0.0455\\ 
+  $\beta_3 \approx -0.0164$ & $se(\beta_3) \approx 6.59\times10^{-4}$  & Conf. Int $\approx$ $( -2.94\times10^{-3}, -3.47\times10^{-4})$ & P-values $\approx$ 0.0130\\ 
+  $\beta_4 \approx 8.23\times10^{-5}$ & $se(\beta_4) \approx 3.55\times10^{-5} $ & Conf. Int $\approx$ $(1.27\times10^{-5}, 1.52\times10^{-4})$ & P-values $\approx$ 0.0206\\ 
+  $\beta_5 \approx 1.25\times10^{-6}$ & $se(\beta_5) \approx  3.05\times10^{-6}$& Conf. Int $\approx$ $(-4.74\times10^{-6}, 7.24\times10^{-6})$ & P-values $\approx$ 0.682\\ 
+  $\beta_6 \approx -1.62\times10^{-7}$ & $se(\beta_6) \approx  7.43\times10^{-8}$& Conf. Int $\approx$ $(-3.08\times10^{-7}, -1.58\times10^{-8})$ & P-values $\approx$ 0.0299\\   
+  $\beta_7 \approx -9.43\times10{-10}$ & $se(\beta_7) \approx  5.78\times10^{-9}$& Conf. Int $\approx$ $(-1.23\times10^{-8}, 1.04\times10^{-8})$ & P-values $\approx$ 0.870\\ 
+  $\beta_8 \approx 1.69\times10^{-10}$ & $se(\beta_8) \approx  7.37\times10^{-11}$& Conf. Int $\approx$ $(2.45\times10^{-11}, 3.14\times10^{-10})$ & P-values $\approx$ 0.0221\\ 
+  $\beta_9 \approx -1.80\times10^{-13}$ & $se(\beta_9) \approx  3.88\times10^{-12}$& Conf. Int $\approx$ $(-7.80\times10^{-12}, 7.43\times10^{-12})$ & P-values $\approx$ 0.963\\ 
+  $\beta_10 \approx -4.02\times10^{-14}$ & $se(\beta_10) \approx 6.21\times10^{-14}$ & Conf. Int $\approx$ $(-1.62\times10^{-13}, 8.18\times10^{-14})$ & P-values $\approx$ 0.517\\ 
+\end{tabular}
+$$
+
+$$
+R^2 = 0.9631
+$$
+
+### Part (b)
+
+```{r}
+f1_pred <- predict(f1, test)
+
+E1 <- dist(rbind(f1_pred, test.y), method = 'euclidean')
+E1
+```
+
+### Part (c)
+
+```{r}
+f2 <- lm(FIELD ~ TEMP.3 + TEMP.6, data = train)
+
+f2_pred <- predict(f2, test)
+E2 <- dist(rbind(f2_pred, test.y), method = 'euclidean')
+E2
+```
+
+$$
+\begin{tabular}{ l l l l }
+  $\beta_0 \approx 2.153$ & $se(\beta_0) \approx 0.0925$ & Conf. Int $\approx$ $(1.97, 2.34)$ & P-values $\approx$ $1.46\times10^{-81}$\\
+  $\beta_3 \approx -1.24\times10^{-3}$ & $se(\beta_3) \approx 1.11\times10^{-5}$ & Conf. Int $\approx$ $(-1.26\times10^{-3}, -1.22\times10^{-3})$ & P-values $\approx$ 0\\
+  $\beta_6 \approx 3.09\times10^{-8}$ & $se(\beta_6) \approx 2.92\times10^{-10}$ & Conf. Int $\approx$ $(3.03\times10^{-8}, 3.15\times10^{-8})$ & P-values $\approx$ 0\\
+\end{tabular}
+$$
+
+$$
+R^2 = 0.9624
+$$
+
+(i) All p-values in this model shows high significance between the response variable, $field$, and our variables.
+
+(ii) $R^2_{f1} = 0.9631$ is larger than that of $R^2_{f2} = 0.9624$; however, this could be caused by the $R^2$ statistic's tendancy to increase if there are more variables in the linear regression. To account for this, we will look at the Adjusted-$R^2$. If we do so, we see that Adjusted-$R^2_{f1} = 0.9624$ is slightly larger than that of Adjusted-$R^2_{f2}$. In other words, the full model is slighly more appropriate for encompasing more of the data.
+
+### Part (d)
+
+Based on the process described, the following function was built to automate the task. The p-value of the intercept, $\beta_0$ is not considered.
+
+```{r}
+optimize <- function (x) {
+  #Get features excluding the response feature
+  names <- colnames(x)[colnames(x) != 'FIELD']
+  
+  #Continue loop until all features have a p-value < 0.01
+  repeat {
+    #Build model
+    model <- lm(reformulate(names, response = 'FIELD'), data = x)
+    
+    #How many features were in the regression?
+    rows <- nrow(coef(summary(model)))
+    
+    #Identify which features show insignifcance compared to 0
+    not_sig <- as.vector(coef(summary(model))[2:rows,4] > 0.01)
+    
+    if (sum(not_sig) == 0 | is.null(not_sig) == TRUE) {
+      #If no insignificant features, break loop
+      break
+    } else {
+      #Get which feature has the largest p-value
+      p_values <- coef(summary(model))[2:rows,4]
+      max_p <- names(p_values[which.max(p_values)])
+      
+      #And remove it. Rerun model with features left.
+      names <- setdiff(names, max_p)
+    }
+  }
+  
+  return(model)
+}
+
+f3 <- optimize(train)
+summary(f3)
+```
+
+If we look to the Adjusted-$R^2$ of this model and the one proposed in Part (c), we see they are identical. In application, this model's predictive power will not likely surpass that of the $F_2$ model in Part (c).
+
+### Part (e)
+
+```{r}
+f3_pred <- predict(f3, test)
+
+E3 <- dist(rbind(f3_pred, test.y), method = 'euclidean')
+
+rbind(c("E1",E1[1]),c("E2", E2[1]),c("E3", E3[1]))
+```
+
+Based on the observation made in Part (d) as well as the comparisons of $SSR$, it would be logical to pick model $F_2$ from Part (c).

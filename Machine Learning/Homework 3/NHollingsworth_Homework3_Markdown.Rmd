@@ -1,0 +1,284 @@
+---
+title: "MSA 8150: Machine Learning - Homework 3"
+author: "Nykosi Hollingsworth (Panther ID: 002389535)"
+date: "March 27, 2019"
+output: pdf_document
+header-includes:
+   - \usepackage{mathtools}
+   - \usepackage{amsmath}
+   - \usepackage{siunitx}
+   - \usepackage{array}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# List of Student Discussions
+
+* Vamsi Chinta
+
+
+## Question 1
+
+### Part (a)
+
+\[
+RSS_{Ridge} = \sum^{n}_{i=1} (y_i-\hat{\beta} -\hat{\beta} x_i)^{2} + \lambda\hat{\beta}^2
+\]
+
+\[
+\begin{aligned}
+\frac{\partial RSS_{Ridge}}{\partial\hat{\beta}} &= -2 \sum^{n}_{i=1} (y_i-\hat{\beta} -\hat{\beta} x_i)(1+x_i)+2\lambda\hat{\beta} \\
+&= -2\left[ \sum^{n}_{i=1} (y_i-\hat{\beta} -\hat{\beta} x_i)(1+x_i)-\lambda\hat{\beta}\right] = 0 \\
+&\therefore \sum^{n}_{i=1} (y_i-\hat{\beta} -\hat{\beta} x_i)(1+x_i)-\lambda\hat{\beta} = 0
+\end{aligned}
+\]
+
+\[
+\begin{aligned}
+\sum^{n}_{i=1} (y_i-\hat{\beta} -\hat{\beta} x_i)(1+x_i)-\lambda\hat{\beta} &= 0 \\
+\sum^{n}_{i=1}\left[ y_i -\hat{\beta} - \hat{\beta}x_i + y_ix_i - \hat{\beta}x_i - \hat{\beta}x_i^2 \right] - \lambda\hat{\beta} &= 0\\
+\sum^{n}_{i=1}y_i - n\hat{\beta} - 2\beta\sum^{n}_{i=1}x_i + \sum^{n}_{i=1}y_ix_i-\hat{\beta}\sum^{n}_{i=1}x_i^2 - \lambda\hat{\beta} &=0\\
+\sum^{n}_{i=1}y_i + \sum^{n}_{i=1}y_ix_i &= \lambda\hat{\beta} + \hat{\beta}\sum^{n}_{i=1}x_i^2+2 \beta\sum^{n}_{i=1}x_i+n\hat{\beta}\\
+\sum^{n}_{i=1}y_i + \sum^{n}_{i=1}y_ix_i &= \hat{\beta}\left[\lambda + \sum^{n}_{i=1}x_i^2+2 \sum^{n}_{i=1}x_i+n\right]\\
+\sum^{n}_{i=1}y_i(1+x_i) &= \hat{\beta}\left[\lambda + \sum^{n}_{i=1}(1+x_i)^2\right]\\[15pt]
+\therefore \hat{\beta_R} = \frac{\sum^{n}_{i=1}y_i(1+x_i)}{\lambda + \sum^{n}_{i=1}(1+x_i)^2}
+\end{aligned}
+\]
+
+### Part (b)
+
+\[
+\begin{aligned}
+Var(\hat{\beta_R}) &= Var \left[ \frac{\sum^{n}_{i=1}y_i(1+x_i)}{\lambda + \sum^{n}_{i=1}(1+x_i)^2} \right] \\
+&=  \frac{1}{\left(\lambda + \sum^{n}_{i=1}(1+x_i)^2\right)^2} \space Var\left[ \sum_{i=1}^{n}y_i(1+x_i)\right] \\ \\
+&= \frac{1}{\left(\lambda + \sum^{n}_{i=1}(1+x_i)^2\right)^2} \space \left[\hat{\sigma}^2(1+x_1)^2 + \hat{\sigma}^2(1+x_2)^2 + \dots + \hat{\sigma}^2(1+x_n)^2\right] \\[10pt]
+&= \frac{\hat{\sigma}^2\sum^{n}_{i=1}(1+x_i)^2}{\left(\lambda + \sum^{n}_{i=1}(1+x_i)^2\right)^2}
+\end{aligned}
+\]
+
+### Part (c)
+
+Given,
+
+\[
+\begin{aligned}
+&var(\hat\beta_R) = \frac{\hat{\sigma}^2\sum^{n}_{i=1}(1+x_i)^2}{\left(\lambda + \sum^{n}_{i=1}(1+x_i)^2\right)^2}\\[15pt] \space\text{and,}\space &var(\hat\beta) = \frac{\hat{\sigma}^2}{\sum^{n}_{i=1}(1+x_i)^2}
+\end{aligned}
+\]
+
+We only need to prove, 
+
+\[
+\frac{\sum^{n}_{i=1}(1+x_i)^2}{\left(\lambda + \sum^{n}_{i=1}(1+x_i)^2\right)^2} \leq \frac{1}{\sum^{n}_{i=1}(1+x_i)^2} \space \text{for all}\space \lambda>0\\[15pt]
+\]
+
+To show this, let us set $\sum^{n}_{i=1}(1+x_i)^2 = \theta$ to simplify our algebra. Thus,
+
+\[
+\frac{\theta}{(\lambda + \theta)^2} \leq \frac{1}{\theta} \space \text{for all}\space \lambda>0
+\]
+
+Case 1: $\lambda = 0$
+
+\[
+\begin{aligned}
+var(\hat\beta_R) &= \frac{\theta}{(\theta)^2}\\[5pt]
+&= \frac{1}{\theta}\\[15pt]
+\end{aligned}
+\]
+
+thus, $var(\hat\beta_R) = var(\hat\beta)$ when $\lambda = 0$
+
+Case 2: $\lambda > 0$
+
+\[
+\begin{aligned}
+var(\hat\beta_R) &= \frac{\theta}{(\lambda+\theta)^2}\\[5pt]
+&= \frac{\theta}{\lambda^2 + 2\lambda\theta + \theta^2}\\[20pt]
+var(\hat\beta) &= \frac{1}{\theta}\\[5pt]
+&= \frac{\theta}{\theta^2}
+\end{aligned}
+\]
+
+With a bit of manipulation, we can clearly see that $\lambda^2 + 2\lambda\theta + \theta^2 \geq \theta^2$, proving that $var(\hat\beta_R)$ will always be closer to zero than $var(\hat\beta)$.
+
+## Question 2
+
+```{r message=FALSE, warning=FALSE}
+setwd("C:/Users/nholl/Dropbox/2019 SPRING/MSA 8150 - Machine Learning/Homework/HW3")
+
+library(ISLR)
+library(glmnet)
+library(pls)
+library(splines)
+library(gam)
+```
+
+```{r}
+data <- read.csv(file="Fertility.csv", header=TRUE, sep=",")
+
+train <- data[1:30,]
+ytrain <- train$Fertility
+
+test <- data[31:47,]
+ytest <- test$Fertility
+```
+
+### Part (a)
+
+```{r}
+ols.fit <- lm(Fertility ~., data = train)
+#summary(ols.fit)
+
+ols.pred <- predict(ols.fit, test[,-1])
+ols.mse <- norm(as.matrix(ytest-ols.pred))
+
+#MSE
+ols.err <- mean((ols.pred-ytest)**2)
+print(ols.err)
+```
+
+### Part (b)
+
+```{r}
+#Selecting Best Lambda
+grid=10^seq(10,-2,length=100)
+
+set.seed(1)
+cv.out <- cv.glmnet(as.matrix(train[,-1]),ytrain, alpha = 0)
+plot(cv.out)
+
+bestlam <- cv.out$lambda.min
+
+#Fitting Model
+ridge.fit <- glmnet(as.matrix(train[,-1]),ytrain,alpha=0,lambda=grid)
+
+#Predictions
+ridge.pred <- predict(ridge.fit, s=bestlam, newx=as.matrix(test[,-1]))
+
+#MSE
+ridge.err <- mean((ridge.pred-ytest)**2)
+print(ridge.err)
+```
+
+### Part (c)
+
+```{r}
+#Selecting Best Lambda
+set.seed(1)
+cv.out2 <- cv.glmnet(as.matrix(train[,-1]),ytrain, alpha = 1)
+plot(cv.out2)
+
+bestlam2 <- cv.out2$lambda.min
+
+#Fitting Model
+lasso.fit <- glmnet(as.matrix(train[,-1]),ytrain,alpha=1,lambda=grid)
+
+#Predictions
+lasso.pred <- predict(ridge.fit, s=bestlam2, newx=as.matrix(test[,-1]))
+
+#MSE
+lasso.err <- mean((lasso.pred-ytest)**2)
+print(lasso.err)
+```
+
+### Part (d)
+
+```{r}
+set.seed(5)
+pcr.fit <- pcr(Fertility~., data=train,scale=TRUE,validation="CV")
+
+validationplot(pcr.fit,val.type="MSEP")
+
+#Predictions using optimum number of components (2)
+pcr.pred <- predict(pcr.fit,test[,-1], ncomp=2)
+
+#MSE
+pcr.err <- mean((pcr.pred-ytest)**2)
+print(pcr.err)
+```
+
+### Part (e)
+
+```{r}
+models <- c("OLS","Ridge","LASSO","PCR")
+errors <- c(ols.err, ridge.err, lasso.err, pcr.err)
+
+as.data.frame(cbind(models, errors))
+```
+
+For this data, the model that shows the most promise is a Principle Component Regression with an MSE of $\approx 140.12$.
+
+## Question 3
+
+```{r}
+rm(list=ls())
+data <- read.csv(file="Auto.csv", header=TRUE, sep=",")
+```
+
+### Part (a)
+
+```{r}
+poly.fit <- lm(mpg~poly(horsepower,4),data=data)
+
+hplims <- range(data$horsepower)
+hp.grid <- seq(from=hplims[1],to=hplims[2])
+
+#Predictions
+poly.pred <- predict(poly.fit,newdata=list(horsepower=hp.grid),se=TRUE)
+se.bands <- cbind(poly.pred$fit+2*poly.pred$se.fit,poly.pred$fit-2*poly.pred$se.fit)
+
+#Plot
+par(mfrow=c(1,1),mar=c(4.5,4.5,1,1),oma=c(0,0,4,0))
+plot(data$horsepower,data$mpg,xlim=hplims,cex=.5,col="darkgrey")
+title("Degree-6 Polynomial",outer=T)
+lines(hp.grid,poly.pred$fit,lwd=2,col="blue")
+matlines(hp.grid,se.bands,lwd=1,col="blue",lty=3)
+```
+
+### Part (b)
+
+```{r}
+spline.fit <- lm(mpg~ns(horsepower,df=6),data=data)
+spline.pred <- predict(spline.fit,newdata=list(horsepower=hp.grid),se=T)
+
+#Plotting
+plot(data$horsepower,data$mpg,col="darkgray")
+title("Natural Spline: DF = 6")
+lines(hp.grid,spline.pred$fit,lwd=2,col="blue")
+spline.bands <- cbind(spline.pred$fit+2*spline.pred$se.fit,spline.pred$fit-2*spline.pred$se.fit)
+matlines(hp.grid,spline.bands,lwd=1,col="blue",lty=3)
+```
+
+Both model appear to have the same prediction errors at extreme values of $horsepower$; however, the Polynomial model has considerable tighter confidence intervals in high data areas.
+
+### Part (c)
+
+```{r}
+train <- data[1:350,]
+
+test <- data[351:392,]
+ytest <- test$mpg
+
+#Linear Model
+lm.fit <- lm(mpg~horsepower + acceleration + year, data = train)
+
+lm.pred <- predict(lm.fit,test[,-1])
+
+#GAMS
+gams.fit <- gam(mpg~ns(horsepower,4)+ns(acceleration,4)+year ,data=train)
+
+gams.pred <- predict(gams.fit,test[,-1])
+#MSEs
+lm.err <- mean((lm.pred-ytest)**2)
+gams.err <- mean((gams.pred-ytest)**2)
+
+model <- c("OLS","GAMS")
+errors <- c(lm.err,gams.err)
+
+as.data.frame(cbind(model,errors))
+```
+
+The model which produces the smallest test error is the GAM model with natural splines at an MSE of $\approx 8.1$
