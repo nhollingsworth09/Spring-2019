@@ -1,0 +1,246 @@
+---
+title: "MSA8200 - Econometics Homework 2"
+author: "Nykosi Hollingsworth"
+date: "February 16, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Question 1
+
+### Part (a)
+
+Estimation criteria for OLS are the assumptions needed for an acurate estimation of our $\beta$ coefficients. These assumptions include the following:
+
+* These is a likely linear relationship between dependent and independent variables
+* The error of the model is not affected by the independent variables
+* There is no multi-collinearity between independnt variables
+  
+### Part (b)
+
+For a linear regression: $y = \beta_ +, \beta_1x_1 + \beta_2x_2 + \dots + \beta_kx_k + u$
+
+(i) Given $x_k$ is correlated to $u$, a proxy variable is used to replace an unmeasurable features (not included in the model) with a measurable proxy. On the other hand, an instrument variable does not replace any variable. Instead, it is used to estimate a measuable feature within the model - $x_k$ in this case.
+
+(ii) Expanding on Part (i), the instrument variable needs to be highly correlated to $X_k$, for accurate estimation, and NOT correlated to $y$ (unlike the proxy). The instrument variable is specifically used in cases where a simultaneus nature between $y$ and $x_k$ is expected.
+
+## Question 2
+
+Given $colGPA = \beta_0 + \beta_1hsGPA + \beta_2SAT + \beta_3PC + u$ and $v$ possible instrument variable for PC, we can find values for $\hat{\beta}$ using the first moment under the folling conditions:
+
+1. cov($v,u$) = 0
+2. E($x_iu$) = 0 (previous OLS assumption)
+3. E($\underline{v}u$) = 0 (moment assumption)
+ 
+$$
+y = \underline{x}'\underline{\beta} + u \Rightarrow \hat{y} = \underline{x}'\underline{\hat{\beta}} + u 
+$$
+
+$$
+\underline{v} = (x_1, x_2, \dots , x_{k-1}, v)
+$$
+
+$$
+\begin{aligned}
+\Rightarrow &\underline{v}y = \underline{v}\underline{x}'\underline{\beta} + \underline{v}u \\
+&E(\underline{v}y) = E(\underline{v}\underline{x}')\underline{\beta} + E(\underline{v}u) \\
+&E(\underline{v}y) = E(\underline{v}\underline{x}')\underline{\beta} \\
+\\
+\therefore \space &\hat{\beta}_{IV} = (V'X)^{-1}(V'Y) \\
+\end{aligned}
+$$
+
+## Question 3
+
+### Part (a)
+
+Though we can consider the possibilty for an omitted variable that both correlated to $packs$ and the error term, $u$, the most likely suspect is a measurement error due to the social stigma a pregnant mother might recieve from openly admitting smoking while pregnant. In summary, a pregnant mother might report considerably less packs smoked per day.
+
+### Part (b)
+
+For $cigprice$ to be a good instrument variable, it must satisfy the following conditions:
+
+* cov($cigprice, u$) = 0 
+* $cigprice$ must not be correlated with any independent features, but should be partially correlated to $x_k$
+
+Rationally considering the above, we can assume that $cigprice$ will not have any direct correlation to $bwght$ or any of our other variabels ($male, parity, lfamine$) but partial correlated to $packs$ (ie, higher prices may dive lower purchases).
+
+### Part (c)
+
+```{r}
+rm(list=ls())
+library("foreign")
+library("AER")
+library("MASS")
+library("Matrix")
+
+df = read.dta("bwght.dta",convert.factors = FALSE)
+
+#- OLS
+fit_OLS <- lm(lbwght ~ male + parity + lfaminc + packs, data = df)
+summary(fit_OLS)
+```
+
+```{r}
+fit_2SLS <- ivreg(lbwght ~ male + parity + lfaminc + packs | male + parity + lfaminc + cigprice, data = df)
+summary(fit_2SLS)
+```
+
+The key differences between our OLS and 2SLS estimates are as follows:
+* The $\beta$ coefficient for $packs$ is considerably higher (and opposite sign) in 2SLS than in OLS. However, thi goes against instinct that dictates the more cigarettes you smoke, the larger the impact on birth weight.
+* In the 2SLS estimates, all of our variables (except $male$) fail various significance tests
+* The $R^2$ in the 2SLS is negative. This indicates a forcibly fit model with a slope with the opposite parity of our data trends
+
+### Part (d)
+
+```{r}
+packs_red <- lm(packs ~  male + parity + lfaminc + cigprice, data = df)
+summary(packs_red)
+```
+
+Due to the very low fitting of this model using $cigprice$, we can conclude that it is not a viable instrument variable. In addition to this, it also fails various significane test, which contradicts our condition that $\theta \neq 0$. As such, this instrument variable is the reason for the unintuitive results from Part (c).
+
+### Part (e)
+
+$H_0: X are exogenous$
+
+$H_1:$ Atleast one $\underline{x}_k$ is endogenous
+
+```{r}
+y = df$lbwght
+N = length(y)
+K = 5
+X = cbind(rep(1,N),df$male,df$parity,df$lfaminc, df$packs) 
+Z = cbind(rep(1,N),df$male,df$parity,df$lfaminc, df$packs, df$cigprice) 
+
+X_hat = Z %*% solve(t(Z)%*%Z) %*% t(Z) %*% X
+beta_2SLS = solve(t(X_hat) %*% X_hat) %*% (t(X_hat) %*% y)
+beta_OLS = solve(t(X) %*% X) %*% (t(X) %*% y)
+
+
+u_hat = y - X%*%solve(t(X) %*% X) %*% (t(X) %*% y)
+sigma2_hat = sum(u_hat^2)/(N-K)
+
+AVar_diff = (solve(t(X_hat) %*% X_hat) - solve(t(X) %*% X))*sigma2_hat
+beta_diff = beta_2SLS - beta_OLS
+#rankMatrix(AVar_diff) 
+
+DWH = t(beta_diff) %*% ginv(AVar_diff) %*% beta_diff
+p_value = pchisq(DWH,df=1,lower.tail=FALSE)
+
+print(p_value)
+```
+
+Due to our high p-value, we have to accept the null hypothesis that all $X$ are exogenous. Based on this test, there was no need for an instrument variable (explaining our forcibly fit model).
+
+
+## Question 4
+
+To understand why $\hat{\beta}_{2SLS} = \hat{\beta}_{IV}$ we need to assume that each endogenous variable has only one instrument variable replacement. Thus:
+
+$$
+\hat{\beta}_{2SLS} = 
+\begin{bmatrix}
+   (\hat{X}'\hat{X})^{-1}(\hat{X}'\underline{y})\\
+\end{bmatrix}
+\\
+$$
+Where, 
+$$
+\hat{X} = 
+\begin{bmatrix}
+   1 &  \hat{x}_{1i}  &  \hat{x}_{2i}  &  \dots  &  \hat{x}_{Ki}  \\
+    \vdots  &  \vdots  &  \vdots  &  \vdots  &  \vdots  \\
+   1&  \hat{x}_{1n}  &  \hat{x}_{2n}  &  \dots  &  \hat{x}_{Kn} 
+\end{bmatrix}
+ \Rightarrow Z = \begin{bmatrix}
+   1 & z_{1i} & z_{2i} & \dots & z_{Ki} \\
+   \vdots & \vdots & \vdots & \vdots & \vdots \\
+   1& z_{1n} & z_{2n} & \dots & z_{Kn} \\
+\end{bmatrix} 
+$$
+
+Gained from the 2SLS estimation of each $x_{Ki}$. Because we are replacing each feature with only one instrument, the matrix of features retains it rank(E($X'X$)) = $K$ needed for OLS assumption. Thus, we can see that the act of equating $\hat{X} = Z$ makes the solution identical to the $\beta_{IV}$ equation of:
+
+$$
+\hat{\beta}_{IV} = 
+\begin{bmatrix}
+   (Z'X)^{-1}(Z'$\underline{y}$) \\
+\end{bmatrix}
+\\
+$$
+
+## Question 5
+
+$$
+\underline{y} = X_{2\times18}\underline{\beta} + \underline{u}
+$$
+
+$$
+\begin{bmatrix}
+   hrearn \\
+   hrbens \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+   1 & edu_{111} & expr_{112} & \dots & tenure_{119} & 0 & 0 & 0 & \dots & 0 \\
+   \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots\\
+    0 & 0 & 0 & \dots & 0 & 1 &  edu_{121} & expr_{122} & \dots & tenure_{129}  \\
+    \vdots & \vdots  & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+    0 & 0 & 0 & \dots & 0 & 1 &  edu_{n21} & expr_{n22} & \dots & tenure_{n29}  \\
+\end{bmatrix}
+\begin{bmatrix}
+   \beta_1 \\
+   \beta_2 \\
+   \vdots \\
+   \beta_{18}
+\end{bmatrix}
++
+\begin{bmatrix}
+   u_1 \\
+   u_2 \\ 
+\end{bmatrix}
+$$
+
+Because of our usage of 0s to exclude the presence of $\beta$s not in the original equation, we get the SUR which is a combination of both formula's OLS. The process of doing this can be seen below:
+
+$$
+X'X_{18\times18} = 
+\begin{bmatrix}
+   \sum edu^2 & 0 & \dots & 0 \\
+   0 & \sum expr^2 & \dots & 0 \\
+   \vdots & \vdots & \ddots & 0 \\
+   0 & \dots & 0 & \sum tenure^2
+\end{bmatrix}
+$$
+
+$$
+X'\underline{y} = 
+\begin{bmatrix}
+  \sum hrearn \\
+  \sum edu\times hrlearn \\
+  \sum expr\times hrlearn \\
+  \vdots \\
+  \sum tenure\times hrbens\\
+  \sum hrbens \\
+  \sum edu\times hrbens \\
+  \sum expr\times hrbens \\
+  \vdots \\
+  \sum tenure\times hrbens
+\end{bmatrix}_{18\times1}
+$$
+
+$$
+(X'X)^{-1}(X'\underline{y}) = \underline{\beta} = 
+\begin{bmatrix}
+   \beta_1 \\
+   \beta_2 \\
+   \vdots \\
+   \beta_{18}
+\end{bmatrix}
+$$
+
+Per our result, we solve for all our $\beta$s simultaneously.
